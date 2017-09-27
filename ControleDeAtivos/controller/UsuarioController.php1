@@ -1,0 +1,52 @@
+<?php
+$dominio = "@TIVIT.CORP";
+@$usuario = $_POST['user'];
+$user = $usuario.$dominio;
+@$pass = $_POST['pass'];
+$ip_server = "TIVIT.CORP";
+
+function valida_ldap($server, $user, $pass)
+{	
+	$port = "389";
+    $ldapCon = @ldap_connect($server) or die("Could not connect LDAP server: $server");
+    
+	// Tenta se conectar com o servidor
+    if($ldapCon)
+	{
+		// Tenta autenticar no servidor
+		$bind = ldap_bind($ldapCon, $user, $pass);
+		
+		if($bind)
+		{
+			die("passou");
+			return TRUE;
+		}
+		else
+		{
+			die;
+			return FALSE;
+		}
+	}
+
+} // fim funcao conectar ldap
+
+if (valida_ldap($ip_server, $user, $pass))
+{
+	require_once("/../dao/UsuarioDAO.php");
+	$usuarioDao = new UsuarioDAO;
+
+	if($usuarioDao->getAcesso($usuario))
+	{
+		session_start();
+		$_SESSION['user'] = $usuario;
+	}
+	else
+	{
+		http_response_code(404);
+	}
+}
+else
+{	
+	http_response_code(404);
+}
+?>
